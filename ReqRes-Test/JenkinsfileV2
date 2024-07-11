@@ -14,18 +14,35 @@ pipeline {
             }
         }
 
-        stage('Run JMeter Tests') {
+        stage('Copy and Set Permissions for JMeter') {
             steps {
                 script {
                     // Copiar el archivo y darle permisos
                     sh '''
-                        cp ReqRes-Test/jmeter/Request_Api.jmx /apache-jmeter-5.6.3/bin
-                        chmod +x /apache-jmeter-5.6.3/bin/Request_Api.jmx
+                        sudo cp ReqRes-Test/jmeter/Request_Api.jmx /apache-jmeter-5.6.3/bin
+                        sudo chmod +x /apache-jmeter-5.6.3/bin/Request_Api.jmx
                     '''
+                }
+            }
+        }
+
+        stage('Run JMeter Tests') {
+            steps {
+                script {
                     // Ejecutar el comando de JMeter
                     dir('/apache-jmeter-5.6.3/bin') {
-                        sh '../jmeter -n -t Request_Api.jmx -l /ReqRes-Test/jmeter/resultados.jtl -e -o /var/jenkins_home/workspace/ReqRes-Test/jmeter/reporte'
+                        sh 'sudo ../jmeter -n -t Request_Api.jmx -l /ReqRes-Test/jmeter/resultados.jtl -e -o /ReqRes-Test/jmeter/reporte'
                     }
+                }
+            }
+        }
+
+        stage('Test with Serenity BDD') {
+            steps {
+                dir('ReqRes-Test') {
+                    sh 'echo "Current directory: $(pwd)"'
+                    sh 'ls -la'
+                    sh './gradlew test aggregate'
                 }
             }
         }
