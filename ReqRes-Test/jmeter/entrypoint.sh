@@ -8,3 +8,5 @@ cp -r /test/reporte/* /var/www/html/
 
 # Start nginx
 nginx -g 'daemon off;'
+
+#docker run --rm -v ${PWD}:/test -p 8080:80 jmeter-nginx

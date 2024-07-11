@@ -1,56 +1,63 @@
 pipeline {
-    agent {
-        docker {
-            image 'gradle:6.8.3-jdk11' // Imagen Docker con Gradle y JDK 11
-            args '-v /var/run/docker.sock:/var/run/docker.sock' // Montar el socket de Docker
-        }
-    }
-    environment {
-        GRADLE_USER_HOME = '/home/gradle'
-    }
+    agent any
+
     stages {
         stage('Checkout') {
             steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
                 script {
-                    def scmVars = checkout([
-                        $class: 'GitSCM',
-                        branches: [[name: '*/main']],
-                        doGenerateSubmoduleConfigurations: false,
-                        extensions: [],
-                        userRemoteConfigs: [[
-                            url: 'https://github.com/matiussw/SiigoReto.git',
-                            credentialsId: 'github-pat'
-                        ]]
-                    ])
+                    docker.image('gradle:6.8.3-jdk11').inside {
+                        sh 'gradle clean build'
+                    }
                 }
             }
         }
-        stage('Build') {
+
+        stage('Test with Serenity BDD') {
             steps {
-                sh './gradlew clean test aggregate'
+                script {
+                    docker.image('gradle:6.8.3-jdk11').inside {
+                        sh 'gradle test aggregate'
+                    }
+                }
             }
         }
-        stage('Publish Report') {
+
+        stage('Publish Test Results') {
             steps {
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: 'build/reports/tests/aggregate',
+                publishHTML([
+                    reportDir: 'build/reports/tests/test',
                     reportFiles: 'index.html',
-                    reportName: 'Serenity Report'
+                    reportName: 'Test Report'
                 ])
             }
         }
+
+        stage('Run JMeter Tests') {
+            steps {
+                script {
+                    docker.image('justb4/jmeter:5.4.1').inside {
+                        sh 'jmeter -n -t ReqRes-Test/jmeter/Request_Api.jmx -l ReqRes-Test/jmeter/result.jtl'
+                    }
+                }
+            }
+        }
+
+        stage('Publish JMeter Results') {
+            steps {
+                perfReport errorFailedThreshold: 0, errorUnstableThreshold: 0, sourceDataFiles: 'path/to/your/result.jtl'
+            }
+        }
     }
+
     post {
         always {
-            archiveArtifacts artifacts: 'build/libs/*.jar', allowEmptyArchive: true
-        }
-        failure {
-            mail to: 'usuario@ejemplo.com',
-                 subject: "Fallo en el build ${env.BUILD_NUMBER}",
-                 body: "Revisa el build ${env.BUILD_URL}"
+            junit 'build/test-results/test/*.xml'
         }
     }
 }
