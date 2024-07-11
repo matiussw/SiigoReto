@@ -8,6 +8,12 @@ pipeline {
             }
         }
 
+        stage('Set Permissions') {
+            steps {
+                sh 'chmod +x ReqRes-Test/gradlew'
+            }
+        }
+
         stage('Build') {
             steps {
                 sh 'ReqRes-Test/gradlew clean build'
