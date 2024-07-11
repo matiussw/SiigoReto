@@ -1,0 +1,51 @@
+pipeline {
+    agent {
+        docker {
+            image 'gradle:6.8.3-jdk11' // Usa la imagen de Gradle con JDK 11
+            args '-v /var/run/docker.sock:/var/run/docker.sock' // Monta el socket de Docker
+        }
+    }
+    environment {
+        // Define variables de entorno si es necesario
+        GRADLE_USER_HOME = '/home/gradle'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                // Clona el repositorio
+                git 'https://github.com/usuario/repo.git'
+            }
+        }
+        stage('Build') {
+            steps {
+                // Ejecuta la compilación y las pruebas con Gradle
+                sh './gradlew clean test aggregate'
+            }
+        }
+        stage('Publish Report') {
+            steps {
+                // Publica el reporte de Serenity BDD
+                publishHTML(target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'build/reports/tests/aggregate',
+                    reportFiles: 'index.html',
+                    reportName: 'Serenity Report'
+                ])
+            }
+        }
+    }
+    post {
+        always {
+            // Guarda los artefactos generados, si es necesario
+            archiveArtifacts artifacts: 'build/libs/*.jar', allowEmptyArchive: true
+        }
+        failure {
+            // Notificaciones en caso de fallo, si es necesario
+            mail to: 'usuario@ejemplo.com',
+                 subject: "Fallo en el build ${env.BUILD_NUMBER}",
+                 body: "Revisa el build ${env.BUILD_URL}"
+        }
+    }
+}

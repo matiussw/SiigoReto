@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+
+  jmeter:
+    image: justb4/jmeter
+    container_name: jmeter
+    ports:
+      - "1099:1099"
+      - "50000:50000"
+    volumes:
+      - jmeter_data:/opt/apache-jmeter-5.4.1
+    entrypoint: /bin/bash
+
+volumes:
+  jenkins_home:
+  jmeter_data:
