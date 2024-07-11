@@ -1,8 +1,8 @@
 pipeline {
     agent {
         docker {
-            image 'gradle:6.8.3-jdk11'
-            args '-v /var/run/docker.sock:/var/run/docker.sock'
+            image 'gradle:6.8.3-jdk11' // Imagen Docker con Gradle y JDK 11
+            args '-v /var/run/docker.sock:/var/run/docker.sock' // Montar el socket de Docker
         }
     }
     environment {
