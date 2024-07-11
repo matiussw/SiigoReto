@@ -20,7 +20,7 @@ pipeline {
                     // Copiar el archivo
                     sh 'cp ReqRes-Test/jmeter/Request_Api.jmx /apache-jmeter-5.6.3/bin'
 
-                    // Verificar si el directorio de resultados existe y no está vacío, y luego borrarlo
+                    // Verificar si el directorio de reporte existe y no está vacío, y luego borrarlo
                     sh '''
                         if [ -d "/var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/reporte" ]; then
                             if [ "$(ls -A /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/reporte)" ]; then
@@ -28,6 +28,13 @@ pipeline {
                             fi
                         else
                             mkdir -p /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/reporte
+                        fi
+                    '''
+
+                    // Verificar si el archivo resultados.jtl existe y no está vacío, y luego borrarlo
+                    sh '''
+                        if [ -f "/var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl" ]; then
+                            > /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl
                         fi
                     '''
                 }
