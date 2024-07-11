@@ -51,7 +51,7 @@ pipeline {
                 sh 'ls -la build/test-results/test'
                 junit 'build/test-results/test/*.xml'
                 publishHTML([
-                    reportDir: 'build/test-results/test',
+                    reportDir: 'build/reports/tests/test',
                     reportFiles: 'index.html',
                     reportName: 'Test Report',
                     keepAll: true,
