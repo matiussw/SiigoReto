@@ -1,0 +1,51 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Set Permissions') {
+            steps {
+                sh 'chmod +x ReqRes-Test/jmeter/Request_Api.jmx'
+            }
+        }
+
+        stage('Run JMeter Tests') {
+            steps {
+                script {
+                    // Copiar el archivo y darle permisos
+                    sh '''
+                        cp ReqRes-Test/jmeter/Request_Api.jmx /apache-jmeter-5.6.3/bin
+                        chmod +x /apache-jmeter-5.6.3/bin/Request_Api.jmx
+                    '''
+                    // Ejecutar el comando de JMeter
+                    dir('/apache-jmeter-5.6.3/bin') {
+                        sh '../jmeter -n -t Request_Api.jmx -l /ReqRes-Test/jmeter/resultados.jtl -e -o /var/jenkins_home/workspace/ReqRes-Test/jmeter/reporte'
+                    }
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            dir('ReqRes-Test') {
+                sh 'echo "Current directory: $(pwd)"'
+                sh 'ls -la build/test-results/test'
+                junit 'build/test-results/test/*.xml'
+                publishHTML([
+                    reportDir: 'jmeter/reporte',
+                    reportFiles: 'index.html',
+                    reportName: 'Test Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
+            }
+        }
+    }
+}
