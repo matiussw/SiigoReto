@@ -31,10 +31,10 @@ pipeline {
                         fi
                     '''
 
-                    // Verificar si el archivo resultados.jtl existe y no está vacío, y luego borrarlo
+                    // Verificar si el archivo resultados.jtl existe y borrarlo
                     sh '''
                         if [ -f "/var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl" ]; then
-                            > /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl
+                            rm /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl
                         fi
                     '''
                 }
