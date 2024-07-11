@@ -16,34 +16,49 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'ReqRes-Test/gradlew clean build'
+                dir('ReqRes-Test') {
+                    sh 'echo "Current directory: $(pwd)"'
+                    sh 'ls -la'
+                    sh './gradlew clean build'
+                }
             }
         }
 
         stage('Test with Serenity BDD') {
             steps {
-                sh 'ReqRes-Test/gradlew test aggregate'
+                dir('ReqRes-Test') {
+                    sh 'echo "Current directory: $(pwd)"'
+                    sh 'ls -la'
+                    sh './gradlew test aggregate'
+                }
             }
         }
 
         stage('Verify Test Results') {
             steps {
-                sh 'ls -la ReqRes-Test/build/test-results/test'  // Verifica los archivos de resultados de pruebas
+                dir('ReqRes-Test') {
+                    sh 'echo "Current directory: $(pwd)"'
+                    sh 'ls -la build/test-results/test'  // Verifica los archivos de resultados de pruebas
+                }
             }
         }
     }
 
     post {
         always {
-            junit 'ReqRes-Test/build/test-results/test/*.xml'
-            publishHTML([
-                reportDir: 'ReqRes-Test/build/reports/tests/test',
-                reportFiles: 'index.html',
-                reportName: 'Test Report',
-                keepAll: true,
-                alwaysLinkToLastBuild: true,
-                allowMissing: false
-            ])
+            dir('ReqRes-Test') {
+                sh 'echo "Current directory: $(pwd)"'
+                sh 'ls -la build/test-results/test'
+                junit 'build/test-results/test/*.xml'
+                publishHTML([
+                    reportDir: 'build/reports/tests/test',
+                    reportFiles: 'index.html',
+                    reportName: 'Test Report',
+                    keepAll: true,
+                    alwaysLinkToLastBuild: true,
+                    allowMissing: false
+                ])
+            }
         }
     }
 }
