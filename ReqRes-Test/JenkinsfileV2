@@ -24,10 +24,10 @@ pipeline {
         stage('Run JMeter Tests') {
             steps {
                 script {
+                    // Verificar la ruta de JMeter
+                    sh 'echo "JMeter Path: $(which jmeter)"'
                     // Ejecutar el comando de JMeter
-                    dir('/apache-jmeter-5.6.3/bin') {
-                        sh '../jmeter -n -t Request_Api.jmx -l /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl -e -o /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/reporte'
-                    }
+                    sh '/apache-jmeter-5.6.3/bin/jmeter -n -t /apache-jmeter-5.6.3/bin/Request_Api.jmx -l /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl -e -o /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/reporte'
                 }
             }
         }
