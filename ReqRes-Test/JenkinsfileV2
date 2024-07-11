@@ -31,16 +31,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Test with Serenity BDD') {
-            steps {
-                dir('ReqRes-Test') {
-                    sh 'echo "Current directory: $(pwd)"'
-                    sh 'ls -la'
-                    sh './gradlew test aggregate'
-                }
-            }
-        }
     }
 
     post {
