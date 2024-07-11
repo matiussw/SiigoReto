@@ -27,9 +27,19 @@ pipeline {
                 }
             }
         }
+    }
+
     post {
         always {
             junit 'build/test-results/test/*.xml'
+            publishHTML([
+                reportDir: 'build/reports/tests/test',
+                reportFiles: 'index.html',
+                reportName: 'Test Report',
+                keepAll: true,
+                alwaysLinkToLastBuild: true,
+                allowMissing: false
+            ])
         }
     }
 }
