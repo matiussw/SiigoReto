@@ -14,15 +14,10 @@ pipeline {
             }
         }
 
-        stage('Copy and Set Permissions for JMeter') {
+        stage('Copy JMeter Test File') {
             steps {
-                script {
-                    // Copiar el archivo y darle permisos
-                    sh '''
-                        sudo cp ReqRes-Test/jmeter/Request_Api.jmx /apache-jmeter-5.6.3/bin
-                        sudo chmod +x /apache-jmeter-5.6.3/bin/Request_Api.jmx
-                    '''
-                }
+                // Copiar el archivo
+                sh 'cp ReqRes-Test/jmeter/Request_Api.jmx /apache-jmeter-5.6.3/bin'
             }
         }
 
@@ -31,7 +26,7 @@ pipeline {
                 script {
                     // Ejecutar el comando de JMeter
                     dir('/apache-jmeter-5.6.3/bin') {
-                        sh 'sudo ../jmeter -n -t Request_Api.jmx -l /ReqRes-Test/jmeter/resultados.jtl -e -o /ReqRes-Test/jmeter/reporte'
+                        sh '../jmeter -n -t Request_Api.jmx -l /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/resultados.jtl -e -o /var/jenkins_home/workspace/ReqRest-Test-LoadTest/ReqRes-Test/jmeter/reporte'
                     }
                 }
             }
