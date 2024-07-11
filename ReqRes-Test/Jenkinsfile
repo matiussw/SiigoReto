@@ -10,44 +10,28 @@ pipeline {
 
         stage('Build') {
             steps {
-                script {
-                    docker.image('gradle:6.8.3-jdk11').inside {
-                        sh 'gradle clean build'
-                    }
-                }
+                sh 'ReqRes-Test/gradlew clean build'
             }
         }
 
         stage('Test with Serenity BDD') {
             steps {
-                script {
-                    docker.image('gradle:6.8.3-jdk11').inside {
-                        sh 'gradle test aggregate'
-                    }
-                }
+                sh 'ReqRes-Test/gradlew test aggregate'
             }
         }
 
         stage('Verify Test Results') {
             steps {
-                script {
-                    docker.image('gradle:6.8.3-jdk11').inside {
-                        sh 'ls -la build/test-results/test'  // Verifica los archivos de resultados de pruebas
-                    }
-                }
+                sh 'ls -la ReqRes-Test/build/test-results/test'  // Verifica los archivos de resultados de pruebas
             }
         }
     }
 
     post {
         always {
-            script {
-                docker.image('gradle:6.8.3-jdk11').inside {
-                    junit 'build/test-results/test/*.xml'
-                }
-            }
+            junit 'ReqRes-Test/build/test-results/test/*.xml'
             publishHTML([
-                reportDir: 'build/reports/tests/test',
+                reportDir: 'ReqRes-Test/build/reports/tests/test',
                 reportFiles: 'index.html',
                 reportName: 'Test Report',
                 keepAll: true,
