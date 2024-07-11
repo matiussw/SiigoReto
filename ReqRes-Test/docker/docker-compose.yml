@@ -1,5 +1,4 @@
-version: '3.8'
-
+version: '3'
 services:
   jenkins:
     image: jenkins/jenkins:lts
@@ -9,19 +8,17 @@ services:
       - "50000:50000"
     volumes:
       - jenkins_home:/var/jenkins_home
-    environment:
-      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+      - /var/run/docker.sock:/var/run/docker.sock
 
-  jmeter:
-    image: justb4/jmeter
-    container_name: jmeter
-    ports:
-      - "1099:1099"
-      - "50000:50000"
-    volumes:
-      - jmeter_data:/opt/apache-jmeter-5.4.1
-    entrypoint: /bin/bash
+  jenkins-agent:
+    image: jenkins/inbound-agent
+    container_name: jenkins-agent
+    environment:
+      - JENKINS_URL=http://jenkins:8080
+      - JENKINS_SECRET=java -jar agent.jar -url http://localhost:8080/ -secret 952141bb70bf2db47bf560ffc8be7d71b6b78d643bc2a21163bb1b7214033706 -name "docker-agent" -workDir "/home/jenkins/agent"
+      - JENKINS_AGENT_NAME=docker-agent
+    depends_on:
+      - jenkins
 
 volumes:
   jenkins_home:
-  jmeter_data:
